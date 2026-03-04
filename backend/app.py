@@ -1,0 +1,163 @@
+from flask import Flask, request, jsonify
+import pandas as pd
+import joblib
+from flask_cors import CORS
+from collections import Counter
+import sqlite3
+import bcrypt
+
+app = Flask(__name__)
+CORS(app)
+
+# ---------------- DATABASE SETUP ----------------
+
+def create_db():
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+
+create_db()
+
+# ---------------- LOAD MODELS ----------------
+
+rf_model = joblib.load("model2/RandomForestClassifier.pkl")
+dt_model = joblib.load("model2/DecisionTreeClassifier.pkl")
+lr_model = joblib.load("model2/LogisticRegression.pkl")
+nb_model = joblib.load("model2/NaiveBayes.pkl")
+svm_model = joblib.load("model2/SVM.pkl")
+
+# ---------------- REGISTER ----------------
+
+@app.route("/register", methods=["POST"])
+def register():
+
+    data = request.json
+    username = data["username"]
+    password = data["password"]
+
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "INSERT INTO users(username,password) VALUES (?,?)",
+            (username, hashed_password)
+        )
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({"message": "Registration successful"})
+
+    except:
+        return jsonify({"message": "User already exists"}), 400
+
+
+# ---------------- LOGIN ----------------
+
+@app.route("/login", methods=["POST"])
+def login():
+
+    data = request.json
+    username = data["username"]
+    password = data["password"]
+
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT password FROM users WHERE username=?",
+        (username,)
+    )
+
+    user = cursor.fetchone()
+    conn.close()
+
+    if user and bcrypt.checkpw(password.encode('utf-8'), user[0]):
+        return jsonify({"message": "Login successful"})
+    else:
+        return jsonify({"message": "Invalid username or password"}), 401
+
+
+# ---------------- PREDICTION ----------------
+
+@app.route("/predict", methods=["POST"])
+def predict():
+
+    data = request.json
+
+    SEX = 1 if data["SEX"] == "M" else 0
+
+    columns = [
+        "HAEMATOCRIT",
+        "HAEMOGLOBINS",
+        "ERYTHROCYTE",
+        "LEUCOCYTE",
+        "THROMBOCYTE",
+        "MCH",
+        "MCHC",
+        "MCV",
+        "AGE",
+        "SEX"
+    ]
+
+    df = pd.DataFrame([[
+
+        float(data["HAEMATOCRIT"]),
+        float(data["HAEMOGLOBINS"]),
+        float(data["ERYTHROCYTE"]),
+        float(data["LEUCOCYTE"]),
+        float(data["THROMBOCYTE"]),
+        float(data["MCH"]),
+        float(data["MCHC"]),
+        float(data["MCV"]),
+        float(data["AGE"]),
+        SEX
+
+    ]], columns=columns)
+
+    # Model predictions
+    rf_pred = rf_model.predict(df)[0]
+    dt_pred = dt_model.predict(df)[0]
+    lr_pred = lr_model.predict(df)[0]
+    nb_pred = nb_model.predict(df)[0]
+    svm_pred = svm_model.predict(df)[0]
+
+    preds = {
+        "RandomForest": rf_pred,
+        "DecisionTree": dt_pred,
+        "LogisticRegression": lr_pred,
+        "NaiveBayes": nb_pred,
+        "SVM": svm_pred
+    }
+
+    readable_preds = {}
+
+    for model, pred in preds.items():
+        readable_preds[model] = "Eligible" if pred == 0 else "Not Eligible"
+
+    final_pred = Counter(preds.values()).most_common(1)[0][0]
+    final_result = "Eligible" if final_pred == 0 else "Not Eligible"
+
+    return jsonify({
+        "model_predictions": readable_preds,
+        "final_prediction": final_result
+    })
+
+
+# ---------------- RUN SERVER ----------------
+
+if __name__ == "__main__":
+    app.run(debug=True)

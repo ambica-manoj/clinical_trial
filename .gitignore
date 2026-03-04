@@ -1,0 +1,22 @@
+# Frontend
+frontend/node_modules
+frontend/build
+
+# Backend virtual environment
+backend/vvenv
+backend/venv
+backend/__pycache__
+
+# Python cache
+*.pyc
+*.pyo
+*.pyd
+
+# Database
+*.db
+
+# Environment
+.env
+
+# Large ML files (if big)
+backend/model2
