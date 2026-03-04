@@ -5,8 +5,8 @@ function PredictionForm() {
 
     const [result, setResult] = useState("");
     const [models, setModels] = useState({});
-
-    const [form, setForm] = useState({
+    const initialForm = {
+        NAME:"",
         HAEMATOCRIT: "",
         HAEMOGLOBINS: "",
         ERYTHROCYTE: "",
@@ -17,7 +17,8 @@ function PredictionForm() {
         MCV: "",
         AGE: "",
         SEX: "M"
-    });
+    };
+    const [form, setForm] = useState(initialForm);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -32,6 +33,8 @@ function PredictionForm() {
 
             setResult(response.data.final_prediction);
             setModels(response.data.model_predictions);
+            setForm(initialForm);
+        
         } 
         catch (error) {
             console.error(error);
@@ -46,35 +49,40 @@ function PredictionForm() {
                     Clinical Trial Eligibility
                 </h2>
                 <form onSubmit={handleSubmit} className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <input name="HAEMATOCRIT" placeholder="Hematocrit" onChange={handleChange}
+                    <input name="NAME" placeholder="Patient Name" onChange={handleChange} value={form.NAME} 
+                            className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
+
+                    <input name="HAEMATOCRIT" placeholder="Hematocrit" onChange={handleChange} value={form.HAEMATOCRIT}
                         className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="HAEMOGLOBINS" placeholder="Hemoglobin" onChange={handleChange}
+                    <input name="HAEMOGLOBINS" placeholder="Hemoglobin" onChange={handleChange} value={form.HAEMOGLOBINS}
                         className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="ERYTHROCYTE" placeholder="Erythrocyte" onChange={handleChange}
+                    <input name="ERYTHROCYTE" placeholder="Erythrocyte" onChange={handleChange} value={form.ERYTHROCYTE}
                         className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="LEUCOCYTE" placeholder="Leucocyte" onChange={handleChange}
+                    <input name="LEUCOCYTE" placeholder="Leucocyte" onChange={handleChange} value={form.LEUCOCYTE}
                         className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="THROMBOCYTE" placeholder="Thrombocyte" onChange={handleChange}
+                    <input name="THROMBOCYTE" placeholder="Thrombocyte" onChange={handleChange} value={form.THROMBOCYTE}
                         className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
 
-                    <input name="MCH" placeholder="MCH" onChange={handleChange}
+                    <input name="MCH" placeholder="MCH" onChange={handleChange} value={form.MCH}
                         className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="MCHC" placeholder="MCHC" onChange={handleChange}
+                    <input name="MCHC" placeholder="MCHC" onChange={handleChange} value={form.MCHC}
                         className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="MCV" placeholder="MCV" onChange={handleChange}
+                    <input name="MCV" placeholder="MCV" onChange={handleChange} value={form.MCV}
                         className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="AGE" placeholder="Age" onChange={handleChange}
+                    <input name="AGE" placeholder="Age" onChange={handleChange} value={form.AGE}
                         className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <select name="SEX" onChange={handleChange} className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300">
+                    <select name="SEX" onChange={handleChange}  value={form.SEX} className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300">
                            <option value="M">Male</option>
                            <option value="F">Female</option>
                     </select>
 
-                    <button ype="submit" className="col-span-2 md:col-span-3 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition">
+                    <button type="submit" className="col-span-2 md:col-span-3 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition">
                         Predict
                     </button>
+
                 </form>
                 {result &&(
+                    
                     <div className="mt-8">
                         <h3 className="text-xl font-semibold text-green-600 mb-4">
                             Final Prediction:{result}  </h3>

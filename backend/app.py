@@ -5,6 +5,7 @@ from flask_cors import CORS
 from collections import Counter
 import sqlite3
 import bcrypt
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -97,6 +98,7 @@ def login():
 def predict():
 
     data = request.json
+    name = data["NAME"]
 
     SEX = 1 if data["SEX"] == "M" else 0
 
@@ -114,7 +116,6 @@ def predict():
     ]
 
     df = pd.DataFrame([[
-
         float(data["HAEMATOCRIT"]),
         float(data["HAEMOGLOBINS"]),
         float(data["ERYTHROCYTE"]),
@@ -125,7 +126,6 @@ def predict():
         float(data["MCV"]),
         float(data["AGE"]),
         SEX
-
     ]], columns=columns)
 
     # -------- MODEL PREDICTIONS --------
@@ -167,14 +167,39 @@ def predict():
         weighted_score += pred * weights[model]
 
     final_pred = 1 if weighted_score > (total_weight / 2) else 0
-
     final_result = "Eligible" if final_pred == 0 else "Not Eligible"
+
+    # -------- SAVE ELIGIBLE PATIENT --------
+
+    if final_result == "Eligible":
+
+        patient_record = {
+            "NAME": name,
+            "HAEMATOCRIT": data["HAEMATOCRIT"],
+            "HAEMOGLOBINS": data["HAEMOGLOBINS"],
+            "ERYTHROCYTE": data["ERYTHROCYTE"],
+            "LEUCOCYTE": data["LEUCOCYTE"],
+            "THROMBOCYTE": data["THROMBOCYTE"],
+            "MCH": data["MCH"],
+            "MCHC": data["MCHC"],
+            "MCV": data["MCV"],
+            "AGE": data["AGE"],
+            "SEX": data["SEX"]
+        }
+
+        df_patient = pd.DataFrame([patient_record])
+
+        file_path = "eligible_patients.csv"
+
+        if not os.path.exists(file_path):
+            df_patient.to_csv(file_path, index=False)
+        else:
+            df_patient.to_csv(file_path, mode="a", header=False, index=False)
 
     return jsonify({
         "model_predictions": readable_preds,
         "final_prediction": final_result
     })
-
 
 # ---------------- RUN SERVER ----------------
 

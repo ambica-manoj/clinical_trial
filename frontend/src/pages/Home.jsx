@@ -15,7 +15,7 @@ function Home() {
           </Link>
           <Link to="/register">
             <button className="bg-green-400 hover:bg-green-500 text-white px-6 py-2 rounded-lg transition">
-              Register
+              Register              
             </button>
           </Link>
         </div>

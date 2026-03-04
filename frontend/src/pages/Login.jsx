@@ -29,7 +29,7 @@ function Login(){
                 </h2>
                 <input type="text" placeholder="Username" onChange={(e)=>setUsername(e.target.value)}
                     className="w-full p-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-300"/>
-                <input type="password" placeholder="Password" nChange={(e)=>setPassword(e.target.value)}
+                <input type="password" placeholder="Password" onChange={(e)=>setPassword(e.target.value)}
                     className="w-full p-2 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-300"/>
                 <button onClick={handleLogin} className="w-full bg-blue-400 hover:bg-blue-500 text-white py-2 rounded-lg transition">
                     Login
