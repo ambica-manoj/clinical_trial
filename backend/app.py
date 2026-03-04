@@ -65,7 +65,7 @@ def register():
         return jsonify({"message": "User already exists"}), 400
 
 
-# ---------------- LOGIN ----------------
+# ---------------- LOGIN 
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -128,7 +128,8 @@ def predict():
 
     ]], columns=columns)
 
-    # Model predictions
+    # -------- MODEL PREDICTIONS --------
+
     rf_pred = rf_model.predict(df)[0]
     dt_pred = dt_model.predict(df)[0]
     lr_pred = lr_model.predict(df)[0]
@@ -143,12 +144,30 @@ def predict():
         "SVM": svm_pred
     }
 
-    readable_preds = {}
+    # -------- HUMAN READABLE OUTPUT --------
 
+    readable_preds = {}
     for model, pred in preds.items():
         readable_preds[model] = "Eligible" if pred == 0 else "Not Eligible"
 
-    final_pred = Counter(preds.values()).most_common(1)[0][0]
+    # -------- WEIGHTED ENSEMBLE VOTING --------
+
+    weights = {
+        "RandomForest": 0.9475,
+        "DecisionTree": 0.72875,
+        "LogisticRegression": 0.714375,
+        "NaiveBayes": 0.674375,
+        "SVM": 0.715
+    }
+
+    weighted_score = 0
+    total_weight = sum(weights.values())
+
+    for model, pred in preds.items():
+        weighted_score += pred * weights[model]
+
+    final_pred = 1 if weighted_score > (total_weight / 2) else 0
+
     final_result = "Eligible" if final_pred == 0 else "Not Eligible"
 
     return jsonify({
