@@ -42,47 +42,102 @@ function PredictionForm() {
     };
 
     return (
-
         <div className="min-h-screen bg-blue-50 p-8 flex flex-col items-center">
             <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-4xl">
                 <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">
                     Clinical Trial Eligibility
                 </h2>
-                <form onSubmit={handleSubmit} className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <input name="NAME" placeholder="Patient Name" onChange={handleChange} value={form.NAME} 
-                            className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
+                <p className="text-sm text-gray-500 text-center mb-6">
+                    Enter patient blood test values to predict clinical trial eligibility
+                </p>
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Patient Name */}
+                    <div className="flex flex-col gap-1.5">
+                        <label className="font-medium text-gray-700">Patient Name</label>
+                         <small className="invisible text-sm">placeholder</small>
+                        <input type="text" name="NAME" value={form.NAME} onChange={handleChange} className="border p-2 rounded-lg"/>
+                    </div>
 
-                    <input name="HAEMATOCRIT" placeholder="Hematocrit" onChange={handleChange} value={form.HAEMATOCRIT}
-                        className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="HAEMOGLOBINS" placeholder="Hemoglobin" onChange={handleChange} value={form.HAEMOGLOBINS}
-                        className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="ERYTHROCYTE" placeholder="Erythrocyte" onChange={handleChange} value={form.ERYTHROCYTE}
-                        className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="LEUCOCYTE" placeholder="Leucocyte" onChange={handleChange} value={form.LEUCOCYTE}
-                        className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="THROMBOCYTE" placeholder="Thrombocyte" onChange={handleChange} value={form.THROMBOCYTE}
-                        className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
+                    {/* Hematocrit */}
+                    <div className="flex flex-col gap-1">
+                        <label className="font-medium text-gray-700">Hematocrit Level % </label>
+                        <small className="text-gray-500 mb-1">Normal range: 36-53%</small>
+                        <input type="number" step="any" name="HAEMATOCRIT" value={form.HAEMATOCRIT} onChange={handleChange} className="border p-2 rounded-lg"/>
+                    </div>
 
-                    <input name="MCH" placeholder="MCH" onChange={handleChange} value={form.MCH}
-                        className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="MCHC" placeholder="MCHC" onChange={handleChange} value={form.MCHC}
-                        className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="MCV" placeholder="MCV" onChange={handleChange} value={form.MCV}
-                        className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <input name="AGE" placeholder="Age" onChange={handleChange} value={form.AGE}
-                        className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300"/>
-                    <select name="SEX" onChange={handleChange}  value={form.SEX} className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-300">
-                           <option value="M">Male</option>
-                           <option value="F">Female</option>
-                    </select>
+                    {/* Hemoglobin */}
+                    <div className="flex flex-col gap-1">
+                        <label className="font-medium text-gray-700">Hemoglobin (g/dL)</label>
+                        <small className="text-gray-500 mb-1">Normal range: 12-17 g/dL</small>
+                        <input type="number" step="any" name="HAEMOGLOBINS" value={form.HAEMOGLOBINS} onChange={handleChange} className="border p-2 rounded-lg"/>
+                    </div>
+
+                    {/* RBC */}
+                    <div className="flex flex-col gap-1">
+                        <label className="font-medium text-gray-700">Red Blood Cell Count</label>
+                        <small className="text-gray-500 mb-1">Normal range: 4.0-6.0 million/µL</small>
+                        <input type="number" step="any" name="ERYTHROCYTE" value={form.ERYTHROCYTE} onChange={handleChange} className="border p-2 rounded-lg"/>
+                    </div>
+
+                    {/* WBC */}
+                    <div className="flex flex-col gap-1">
+                        <label className="font-medium text-gray-700">White Blood Cell Count</label>
+                        <small className="text-gray-500 mb-1">Normal range: 4-11 thousand/µL</small>
+                        <input type="number" step="any"  name="LEUCOCYTE" value={form.LEUCOCYTE} onChange={handleChange} className="border p-2 rounded-lg"/>
+                    </div>
+
+                    {/* Platelets */}
+                    <div className="flex flex-col gap-1">
+                        <label className="font-medium text-gray-700">Platelet Count</label>
+                        <small className="text-gray-500 mb-1">Normal range: 150-450 thousand/µL</small>
+                        <input type="number" step="any" name="THROMBOCYTE" value={form.THROMBOCYTE} onChange={handleChange} className="border p-2 rounded-lg"/>
+                    </div>
+
+                    {/* MCH */}
+                    <div className="flex flex-col gap-1">
+                        <label className="font-medium text-gray-700">Mean Corpuscular Hemoglobin (MCH)</label>
+                        <small className="text-gray-500 mb-1">Normal range: 27-33 pg</small>
+                        <input type="number" step="any" name="MCH" value={form.MCH} onChange={handleChange} className="border p-2 rounded-lg"/>
+                    </div>
+
+                    {/* MCHC */}
+                    <div className="flex flex-col gap-1">
+                        <label className="font-medium text-gray-700">Mean Corpuscular Hemoglobin Concentration (MCHC)</label>
+                        <small className="text-gray-500 mb-1">Normal range: 32-36 g/dL</small>
+                        <input type="number" step="any" name="MCHC" value={form.MCHC} onChange={handleChange} className="border p-2 rounded-lg" />
+                    </div>
+
+                    {/* MCV */}
+                    <div className="flex flex-col gap-1">
+                        <label className="font-medium text-gray-700">Mean Corpuscular Volume (MCV)</label>
+                        <small className="text-gray-500 mb-1">Normal range: 80-100 fL</small>    
+                        <small className="invisible text-sm">placeholder</small>
+                        <input type="number" step="any" name="MCV" value={form.MCV} onChange={handleChange} className="border p-2 rounded-lg"/>
+                    </div>
+
+                    {/* Age */}
+                    <div className="flex flex-col gap-1">
+                        <label className="font-medium text-gray-700">Age</label>
+                        <input type="number" name="AGE" value={form.AGE} onChange={handleChange} className="border p-2 rounded-lg" />
+                    </div>
+
+                    {/* Gender */}
+                    <div className="flex flex-col gap-1">
+                        <label className="font-medium text-gray-700">Gender</label>
+                        <select name="SEX" value={form.SEX} onChange={handleChange} className="border p-2 rounded-lg">
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                        </select>
+                    </div>
 
                     <button type="submit" className="col-span-2 md:col-span-3 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition">
                         Predict
                     </button>
 
                 </form>
-                {result &&(
-                    
+
+
+                {result &&(                    
                     <div className="mt-8">
                         <h3 className="text-xl font-semibold text-green-600 mb-4">
                             Final Prediction:{result}  </h3>
