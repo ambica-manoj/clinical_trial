@@ -43,14 +43,12 @@ function PredictionForm() {
 
     return (
         <div className="min-h-screen bg-blue-50 p-8 flex flex-col items-center">
-            <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-4xl">
-                <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">
-                    Clinical Trial Eligibility
-                </h2>
-                <p className="text-sm text-gray-500 text-center mb-6">
+            <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-4xl">                
+                <h2 className="text-sm text-gray-500 text-center mb-6">
                     Enter patient blood test values to predict clinical trial eligibility
-                </p>
+                </h2>
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    
                     {/* Patient Name */}
                     <div className="flex flex-col gap-1.5">
                         <label className="font-medium text-gray-700">Patient Name</label>
