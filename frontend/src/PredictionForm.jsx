@@ -131,13 +131,12 @@ function PredictionForm() {
                     <button type="submit" className="col-span-2 md:col-span-3 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition">
                         Predict
                     </button>
-
                 </form>
 
-
+                
                 {result &&(                    
                     <div className="mt-8">
-                        <h3 className="text-xl font-semibold text-green-600 mb-4">
+                        <h3 className="text-xl font-semibold text-green-600 mb-6 text-center">
                             Final Prediction:{result}  </h3>
                         <table className="w-full border border-gray-200">
                             <thead className="bg-blue-100">
@@ -158,6 +157,9 @@ function PredictionForm() {
                     </div>
                 )}
             </div>
+            <button  onClick={() => window.location.href = "/eligible-patients"}  className=
+              "mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">View Eligible Patients
+              </button>
         </div>
     );
 }

@@ -2,10 +2,8 @@ from flask import Flask, request, jsonify
 import pandas as pd
 import joblib
 from flask_cors import CORS
-from collections import Counter
 import sqlite3
 import bcrypt
-import os
 
 app = Flask(__name__)
 CORS(app)
@@ -16,11 +14,31 @@ def create_db():
     conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
 
+    # USERS TABLE
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE,
         password TEXT
+    )
+    """)
+
+    # PATIENTS TABLE (ONLY ELIGIBLE STORED)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS patients(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE,
+        haematrocrit REAL,
+        haemoglobins REAL,
+        erythrocyte REAL,
+        leucocyte REAL,
+        thrombocyte REAL,
+        mch REAL,
+        mchc REAL,
+        mcv REAL,
+        age INTEGER,
+        sex TEXT,
+        eligible_count INTEGER DEFAULT 1
     )
     """)
 
@@ -41,7 +59,6 @@ svm_model = joblib.load("model2/SVM.pkl")
 
 @app.route("/register", methods=["POST"])
 def register():
-
     data = request.json
     username = data["username"]
     password = data["password"]
@@ -61,16 +78,13 @@ def register():
         conn.close()
 
         return jsonify({"message": "Registration successful"})
-
     except:
         return jsonify({"message": "User already exists"}), 400
 
-
-# ---------------- LOGIN 
+# ---------------- LOGIN ----------------
 
 @app.route("/login", methods=["POST"])
 def login():
-
     data = request.json
     username = data["username"]
     password = data["password"]
@@ -78,11 +92,7 @@ def login():
     conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT password FROM users WHERE username=?",
-        (username,)
-    )
-
+    cursor.execute("SELECT password FROM users WHERE username=?", (username,))
     user = cursor.fetchone()
     conn.close()
 
@@ -91,8 +101,7 @@ def login():
     else:
         return jsonify({"message": "Invalid username or password"}), 401
 
-
-# ---------------- PREDICTION ----------------
+# ---------------- PREDICT ----------------
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -103,19 +112,12 @@ def predict():
     SEX = 1 if data["SEX"] == "M" else 0
 
     columns = [
-        "HAEMATOCRIT",
-        "HAEMOGLOBINS",
-        "ERYTHROCYTE",
-        "LEUCOCYTE",
-        "THROMBOCYTE",
-        "MCH",
-        "MCHC",
-        "MCV",
-        "AGE",
-        "SEX"
+        "HAEMATOCRIT","HAEMOGLOBINS","ERYTHROCYTE",
+        "LEUCOCYTE","THROMBOCYTE","MCH","MCHC",
+        "MCV","AGE","SEX"
     ]
 
-    df = pd.DataFrame([[
+    df = pd.DataFrame([[ 
         float(data["HAEMATOCRIT"]),
         float(data["HAEMOGLOBINS"]),
         float(data["ERYTHROCYTE"]),
@@ -128,30 +130,21 @@ def predict():
         SEX
     ]], columns=columns)
 
-    # -------- MODEL PREDICTIONS --------
-
-    rf_pred = rf_model.predict(df)[0]
-    dt_pred = dt_model.predict(df)[0]
-    lr_pred = lr_model.predict(df)[0]
-    nb_pred = nb_model.predict(df)[0]
-    svm_pred = svm_model.predict(df)[0]
-
+    # MODEL PREDICTIONS
     preds = {
-        "RandomForest": rf_pred,
-        "DecisionTree": dt_pred,
-        "LogisticRegression": lr_pred,
-        "NaiveBayes": nb_pred,
-        "SVM": svm_pred
+        "RandomForest": rf_model.predict(df)[0],
+        "DecisionTree": dt_model.predict(df)[0],
+        "LogisticRegression": lr_model.predict(df)[0],
+        "NaiveBayes": nb_model.predict(df)[0],
+        "SVM": svm_model.predict(df)[0]
     }
 
-    # -------- HUMAN READABLE OUTPUT --------
+    readable_preds = {
+        model: "Eligible" if pred == 0 else "Not Eligible"
+        for model, pred in preds.items()
+    }
 
-    readable_preds = {}
-    for model, pred in preds.items():
-        readable_preds[model] = "Eligible" if pred == 0 else "Not Eligible"
-
-    # -------- WEIGHTED ENSEMBLE VOTING --------
-
+    # WEIGHTED VOTING
     weights = {
         "RandomForest": 0.9475,
         "DecisionTree": 0.72875,
@@ -160,48 +153,94 @@ def predict():
         "SVM": 0.715
     }
 
-    weighted_score = 0
+    weighted_score = sum(preds[m]*weights[m] for m in preds)
     total_weight = sum(weights.values())
 
-    for model, pred in preds.items():
-        weighted_score += pred * weights[model]
-
-    final_pred = 1 if weighted_score > (total_weight / 2) else 0
+    final_pred = 1 if weighted_score > (total_weight/2) else 0
     final_result = "Eligible" if final_pred == 0 else "Not Eligible"
 
-    # -------- SAVE ELIGIBLE PATIENT --------
+    # ---------------- SAVE ONLY IF ELIGIBLE ----------------
 
     if final_result == "Eligible":
 
-        patient_record = {
-            "NAME": name,
-            "HAEMATOCRIT": data["HAEMATOCRIT"],
-            "HAEMOGLOBINS": data["HAEMOGLOBINS"],
-            "ERYTHROCYTE": data["ERYTHROCYTE"],
-            "LEUCOCYTE": data["LEUCOCYTE"],
-            "THROMBOCYTE": data["THROMBOCYTE"],
-            "MCH": data["MCH"],
-            "MCHC": data["MCHC"],
-            "MCV": data["MCV"],
-            "AGE": data["AGE"],
-            "SEX": data["SEX"]
-        }
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
 
-        df_patient = pd.DataFrame([patient_record])
+        cursor.execute("SELECT eligible_count FROM patients WHERE name=?", (name,))
+        existing = cursor.fetchone()
 
-        file_path = "eligible_patients.csv"
+        if existing:
+            count = existing[0] + 1
 
-        if not os.path.exists(file_path):
-            df_patient.to_csv(file_path, index=False)
+            cursor.execute("""
+            UPDATE patients SET
+                haematrocrit=?, haemoglobins=?, erythrocyte=?,
+                leucocyte=?, thrombocyte=?, mch=?, mchc=?,
+                mcv=?, age=?, sex=?, eligible_count=?
+            WHERE name=?
+            """, (
+                data["HAEMATOCRIT"], data["HAEMOGLOBINS"],
+                data["ERYTHROCYTE"], data["LEUCOCYTE"],
+                data["THROMBOCYTE"], data["MCH"],
+                data["MCHC"], data["MCV"],
+                data["AGE"], data["SEX"],
+                count, name
+            ))
+
         else:
-            df_patient.to_csv(file_path, mode="a", header=False, index=False)
+            cursor.execute("""
+            INSERT INTO patients(
+                name, haematrocrit, haemoglobins, erythrocyte,
+                leucocyte, thrombocyte, mch, mchc,
+                mcv, age, sex, eligible_count
+            )
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,1)
+            """, (
+                name,
+                data["HAEMATOCRIT"], data["HAEMOGLOBINS"],
+                data["ERYTHROCYTE"], data["LEUCOCYTE"],
+                data["THROMBOCYTE"], data["MCH"],
+                data["MCHC"], data["MCV"],
+                data["AGE"], data["SEX"]
+            ))
+
+        conn.commit()
+        conn.close()
 
     return jsonify({
         "model_predictions": readable_preds,
         "final_prediction": final_result
     })
 
-# ---------------- RUN SERVER ----------------
+# ---------------- GET ELIGIBLE PATIENTS ----------------
+
+@app.route("/eligible-patients", methods=["GET"])
+def get_eligible_patients():
+
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, name, age, sex, eligible_count
+        FROM patients
+        ORDER BY eligible_count DESC
+    """)
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    return jsonify([
+        {
+            "id": r[0],
+            "name": r[1],
+            "age": r[2],
+            "sex": r[3],
+            "eligible_count": r[4]
+        }
+        for r in rows
+    ])
+
+# ---------------- RUN ----------------
 
 if __name__ == "__main__":
     app.run(debug=True)
