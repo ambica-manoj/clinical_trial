@@ -2,23 +2,37 @@ import { Link } from "react-router-dom";
 
 function Home() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-blue-50">      
-      <div className="bg-white shadow-lg rounded-xl p-10 text-center w-96">
-        <h1 className="text-2xl font-bold text-blue-700 mb-6">
-          Clinical Trial Eligibility System
+    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-blue-500 flex items-center justify-center px-4">
+
+      <div className="bg-white/20 backdrop-blur-lg shadow-2xl rounded-2xl p-10 text-center w-full max-w-md border border-white/30">
+
+        {/* Title */}
+        <h1 className="text-3xl font-bold text-white mb-3">
+          Clinical Trial System
         </h1>
-        <div className="flex justify-center gap-6">          
+
+        {/* Subtitle */}
+        <p className="text-white/80 mb-8 text-sm">
+          Predict patient eligibility using advanced medical data analysis
+        </p>
+
+        {/* Buttons */}
+        <div className="flex flex-col gap-4">
+
           <Link to="/login">
-            <button className="bg-blue-400 hover:bg-blue-500 text-white px-6 py-2 rounded-lg transition">
+            <button className="w-full bg-white text-indigo-600 font-semibold py-2 rounded-lg hover:scale-105 hover:bg-gray-100 transition">
               Login
             </button>
           </Link>
+
           <Link to="/register">
-            <button className="bg-green-400 hover:bg-green-500 text-white px-6 py-2 rounded-lg transition">
-              Register              
+            <button className="w-full bg-indigo-700 text-white py-2 rounded-lg hover:scale-105 hover:bg-indigo-800 transition">
+              Register
             </button>
           </Link>
+
         </div>
+
       </div>
     </div>
   );
