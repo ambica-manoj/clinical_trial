@@ -1,9 +1,9 @@
-from flask import Flask, request, jsonify
-import pandas as pd
-import joblib
-from flask_cors import CORS
-import sqlite3
-import bcrypt
+from flask import Flask, request, jsonify # type: ignore
+import pandas as pd # type: ignore
+import joblib # type: ignore
+from flask_cors import CORS # type: ignore
+import sqlite3 
+import bcrypt # type: ignore
 
 app = Flask(__name__)
 CORS(app)
