@@ -203,6 +203,8 @@ def predict():
                 data["MCHC"], data["MCV"],
                 data["AGE"], data["SEX"]
             ))
+        
+           
 
         conn.commit()
         conn.close()
