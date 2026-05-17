@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API_BASE_URL from "../config/api";
 
 function EligiblePatients() {
   const [patients, setPatients] = useState([]);
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:5000/eligible-patients")
+      .get(`${API_BASE_URL}/eligible-patients`)
       .then((res) => setPatients(res.data))
       .catch((err) => console.error(err));
   }, []);

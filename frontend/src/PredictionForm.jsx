@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import API_BASE_URL from "./config/api";
 
 function PredictionForm() {
   const [result, setResult] = useState("");
@@ -26,7 +27,7 @@ function PredictionForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://127.0.0.1:5000/predict", form);
+      const response = await axios.post(`${API_BASE_URL}/predict`, form);
       setResult(response.data.final_prediction);
       setModels(response.data.model_predictions);
       setForm(initialForm);
