@@ -18,5 +18,3 @@ backend/__pycache__
 # Environment
 .env
 
-# Large ML files (if big)
-backend/model2
