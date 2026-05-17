@@ -4,6 +4,7 @@ import joblib # type: ignore
 from flask_cors import CORS # type: ignore
 import sqlite3 
 import bcrypt # type: ignore
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -129,6 +130,9 @@ def predict():
         float(data["AGE"]),
         SEX
     ]], columns=columns)
+
+    print(os.listdir())
+    print(os.listdir("model2"))
 
     # MODEL PREDICTIONS
     preds = {
