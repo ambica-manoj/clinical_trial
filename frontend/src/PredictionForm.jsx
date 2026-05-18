@@ -1,10 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "./config/api";
 
 function PredictionForm() {
-  const navigate = useNavigate();
   const [result, setResult] = useState("");
   const [models, setModels] = useState({});
   const initialForm = {
@@ -227,7 +225,7 @@ function PredictionForm() {
         )}
 
         <button
-          onClick={() => navigate("/eligible-patients")}
+          onClick={() => window.location.href = "/eligible-patients"}
           className="mt-8 rounded-3xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:bg-emerald-600"
         >
           View Eligible Patients
